@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TaskFlow Main Entry Controller (Phase 04 Integration & UX Polish)
+   TaskFlow Pro Main Entry Controller (KPI Analytics & View Nav Controller)
    ========================================================================== */
 
 import { 
@@ -19,6 +19,7 @@ import {
 import { 
   renderTaskList, 
   updateStats, 
+  renderKPIDashboard,
   showToast 
 } from './ui.js';
 
@@ -30,13 +31,14 @@ let sortBy = 'createdAt'; // 'createdAt' | 'priority' | 'dueDate'
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  initNavTabs();
   initEventListeners();
   initKeyboardShortcuts();
   refreshApp();
 });
 
 /**
- * Initialize Light/Dark Theme Preference
+ * Initialize Light/Dark Theme
  */
 function initTheme() {
   const settings = getSettings();
@@ -55,11 +57,33 @@ function updateThemeIcon(theme) {
 }
 
 /**
- * Register Global Keyboard Shortcuts (Phase 04 UX Feature)
+ * Navigation View Tabs Switcher (Tasks vs KPI Analytics)
+ */
+function initNavTabs() {
+  const navTabs = document.querySelectorAll('.nav-tab');
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      navTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const targetView = tab.dataset.view;
+      document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active-view'));
+
+      if (targetView === 'kpi') {
+        document.getElementById('view-kpi').classList.add('active-view');
+        renderKPIDashboard(getTasks());
+      } else {
+        document.getElementById('view-tasks').classList.add('active-view');
+      }
+    });
+  });
+}
+
+/**
+ * Keyboard Shortcuts
  */
 function initKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
-    // Escape key closes modal
     if (e.key === 'Escape') {
       const modal = document.getElementById('task-modal');
       if (modal.classList.contains('open')) {
@@ -68,20 +92,19 @@ function initKeyboardShortcuts() {
       return;
     }
 
-    // Don't trigger shortcuts when typing in inputs/textareas
     const activeEl = document.activeElement;
     const isEditingText = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
 
-    // Ctrl+K or Cmd+K or "/" -> Focus Search Input
     if (( (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' ) || (!isEditingText && e.key === '/')) {
       e.preventDefault();
       const searchInput = document.getElementById('search-input');
-      searchInput.focus();
-      searchInput.select();
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
       return;
     }
 
-    // Ctrl+N or Cmd+N -> Open Add Task Modal
     if (!isEditingText && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
       document.getElementById('add-task-btn').click();
@@ -110,12 +133,12 @@ function initEventListeners() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `taskflow_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `taskflow_kpi_backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Đã xuất file dữ liệu sao lưu thành công!');
+    showToast('Xuất file backup dữ liệu thành công!');
   });
 
   // Import JSON File Button
@@ -133,17 +156,17 @@ function initEventListeners() {
       const content = event.target.result;
       const success = importTasksJSON(content);
       if (success) {
-        showToast('Khôi phục dữ liệu từ JSON thành công!');
+        showToast('Khôi phục dữ liệu JSON thành công!');
         refreshApp();
       } else {
-        showToast('File JSON không hợp lệ, vui lòng kiểm tra lại!', 'error');
+        showToast('File JSON không hợp lệ!', 'error');
       }
       importFileInput.value = '';
     };
     reader.readAsText(file);
   });
 
-  // Clickable Stat Dashboard Cards
+  // Clickable Stat Cards
   document.querySelectorAll('.stat-card.clickable').forEach(card => {
     card.addEventListener('click', () => {
       const filterType = card.dataset.statFilter;
@@ -189,7 +212,7 @@ function initEventListeners() {
     const completedCount = tasks.filter(t => t.status === 'completed').length;
     
     if (completedCount === 0) {
-      showToast('Không có công việc nào đã hoàn thành để dọn dẹp.', 'info');
+      showToast('Không có công việc nào đã hoàn thành.', 'info');
       return;
     }
 
@@ -200,13 +223,13 @@ function initEventListeners() {
     }
   });
 
-  // Real-time Search Input
+  // Search Input
   document.getElementById('search-input').addEventListener('input', (e) => {
     searchQuery = e.target.value;
     refreshApp();
   });
 
-  // Modal Control Buttons
+  // Modal Control
   const modal = document.getElementById('task-modal');
   const openModalBtn = document.getElementById('add-task-btn');
   const closeModalBtn = document.getElementById('close-modal-btn');
@@ -236,12 +259,11 @@ function initEventListeners() {
   closeModalBtn.addEventListener('click', closeModal);
   cancelModalBtn.addEventListener('click', closeModal);
 
-  // Close modal when clicking backdrop outside
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
 
-  // Handle Form Submit (Add or Edit)
+  // Form Submit
   taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('task-id').value;
@@ -265,14 +287,13 @@ function initEventListeners() {
     }
   });
 
-  // Task Grid Event Delegation (Toggle, Edit, Delete)
+  // Task Grid Delegation
   const taskGrid = document.getElementById('task-grid');
   taskGrid.addEventListener('click', (e) => {
     const card = e.target.closest('.task-card');
     if (!card) return;
     const taskId = card.dataset.id;
 
-    // Toggle Completed Status
     if (e.target.closest('[data-action="toggle"]')) {
       const updated = toggleTaskStatus(taskId);
       if (updated) {
@@ -282,7 +303,6 @@ function initEventListeners() {
       return;
     }
 
-    // Edit Task
     if (e.target.closest('[data-action="edit"]')) {
       const tasks = getTasks();
       const task = tasks.find(t => t.id === taskId);
@@ -290,7 +310,6 @@ function initEventListeners() {
       return;
     }
 
-    // Delete Task
     if (e.target.closest('[data-action="delete"]')) {
       if (confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
         deleteTask(taskId);
@@ -303,7 +322,7 @@ function initEventListeners() {
 }
 
 /**
- * Filter tasks and refresh the UI view
+ * Filter & Refresh App UI
  */
 function refreshApp() {
   const allTasks = getTasks();

@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TaskFlow — Ứng dụng quản lý công việc cá nhân hiện đại, siêu nhẹ, tối ưu hiệu suất làm việc hàng ngày.">
-  <title>TaskFlow — Quản Lý Công Việc Cá Nhân</title>
+  <meta name="description" content="TaskFlow Pro — Hệ Thống Quản Lý Công Việc & Báo Cáo KPI Năng Suất Cá Nhân Cá Nhân.">
+  <title>TaskFlow Pro — Quản Lý Công Việc & Thống Kê KPI</title>
 
   <!-- Google Fonts & FontAwesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Custom Design System Stylesheet -->
+  <!-- Chart.js CDN for KPI Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Pro Design System Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <!-- Ambient Background Glow -->
+  <!-- Mesh Gradient Background Animation -->
   <div class="app-bg-glow">
     <div class="glow-blob-1"></div>
     <div class="glow-blob-2"></div>
+    <div class="glow-blob-3"></div>
   </div>
 
   <div class="container">
@@ -27,125 +31,215 @@
     <header class="app-header">
       <div class="brand">
         <div class="brand-icon">
-          <i class="fa-solid fa-check-double"></i>
+          <i class="fa-solid fa-chart-line"></i>
         </div>
         <div>
-          <h1 class="brand-title">TaskFlow</h1>
-          <div class="brand-subtitle">Quản lý công việc cá nhân thông minh</div>
+          <h1 class="brand-title">TaskFlow <span class="badge-pro">PRO</span></h1>
+          <div class="brand-subtitle">Quản Lý Công Việc & Báo Cáo KPI Năng Suất</div>
         </div>
       </div>
 
       <div class="header-actions">
-        <button id="export-btn" class="btn-icon" title="Xuất dữ liệu dự án (JSON Backup)" aria-label="Export Data">
-          <i class="fa-solid fa-download"></i>
+        <button id="export-btn" class="btn-icon" title="Xuất dữ liệu JSON Backup" aria-label="Export Data">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
         </button>
-        <button id="import-btn" class="btn-icon" title="Phục hồi dữ liệu từ file JSON" aria-label="Import Data">
-          <i class="fa-solid fa-upload"></i>
+        <button id="import-btn" class="btn-icon" title="Phục hồi dữ liệu từ JSON" aria-label="Import Data">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </button>
         <input type="file" id="import-file-input" accept=".json" style="display: none;">
 
-        <button id="theme-toggle-btn" class="btn-icon" title="Chuyển đổi Chế độ Sáng/Tối" aria-label="Toggle Theme">
+        <button id="theme-toggle-btn" class="btn-icon" title="Chuyển đổi Sáng/Tối" aria-label="Toggle Theme">
           <i class="fa-solid fa-moon"></i>
         </button>
       </div>
     </header>
 
-    <!-- Keyboard Shortcuts Hint Bar -->
+    <!-- Main Navigation View Tabs -->
+    <nav class="view-nav-tabs">
+      <button class="nav-tab active" data-view="tasks">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Danh Sách Công Việc</span>
+      </button>
+      <button class="nav-tab" data-view="kpi">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Báo Cáo KPI & Analytics</span>
+      </button>
+    </nav>
+
+    <!-- KEYBOARD HINT BAR -->
     <div class="keyboard-hint-bar">
       <span><kbd>Ctrl</kbd> + <kbd>K</kbd> Tìm kiếm</span>
-      <span><kbd>Ctrl</kbd> + <kbd>N</kbd> Thêm việc mới</span>
-      <span><kbd>Esc</kbd> Đóng cửa sổ</span>
+      <span><kbd>Ctrl</kbd> + <kbd>N</kbd> Tạo việc mới</span>
+      <span><kbd>Esc</kbd> Đóng modal</span>
     </div>
 
-    <!-- Stats Dashboard Bar (Clickable Stat Cards) -->
-    <section class="stats-dashboard" id="stats-dashboard">
-      <div class="stat-card clickable" data-stat-filter="all" title="Xem tất cả công việc">
-        <div class="stat-icon total"><i class="fa-solid fa-list-check"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="stat-total">0</div>
-          <div class="stat-label">Tổng số việc</div>
+    <!-- VIEW 1: TASKS MANAGEMENT -->
+    <div id="view-tasks" class="app-view active-view">
+      <!-- KPI Overview Executive Cards -->
+      <section class="stats-dashboard" id="stats-dashboard">
+        <div class="stat-card clickable" data-stat-filter="all" title="Xem tất cả công việc">
+          <div class="stat-icon total"><i class="fa-solid fa-folder-open"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Tổng Công Việc</div>
+          </div>
+        </div>
+        
+        <div class="stat-card clickable" data-stat-filter="pending" title="Lọc việc đang thực hiện">
+          <div class="stat-icon pending"><i class="fa-solid fa-bolt-lightning"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-label">Đang Thực Hiện</div>
+          </div>
+        </div>
+
+        <div class="stat-card clickable" data-stat-filter="completed" title="Lọc việc đã hoàn thành">
+          <div class="stat-icon completed"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-completed">0</div>
+            <div class="stat-label">Đã Hoàn Thành</div>
+          </div>
+        </div>
+
+        <div class="stat-card clickable" data-stat-filter="overdue" title="Lọc việc quá hạn">
+          <div class="stat-icon overdue"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-overdue">0</div>
+            <div class="stat-label">Quá Hạn KPI</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Control Toolbar -->
+      <section class="toolbar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="search-input" placeholder="Tìm kiếm công việc... (Ctrl+K)" aria-label="Search Tasks">
+        </div>
+
+        <!-- Filter Status Tabs -->
+        <div class="filter-group" id="filter-tabs">
+          <button class="filter-btn active" data-filter="all">Tất cả</button>
+          <button class="filter-btn" data-filter="pending">Đang làm</button>
+          <button class="filter-btn" data-filter="completed">Đã xong</button>
+          <button class="filter-btn" data-filter="overdue">Quá hạn</button>
+        </div>
+
+        <!-- Priority & Sort Dropdowns -->
+        <div class="select-group">
+          <select id="priority-filter-select" class="toolbar-select">
+            <option value="all">⚡ Tất cả mức ưu tiên</option>
+            <option value="high">🔴 Ưu tiên Cao</option>
+            <option value="medium">🟡 Ưu tiên Trung bình</option>
+            <option value="low">🟢 Ưu tiên Thấp</option>
+          </select>
+
+          <select id="sort-by-select" class="toolbar-select">
+            <option value="createdAt">🕒 Mới nhất trước</option>
+            <option value="priority">🔥 Ưu tiên cao trước</option>
+            <option value="dueDate">📅 Hạn chót trước</option>
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="toolbar-actions">
+          <button id="clear-completed-btn" class="btn-secondary danger" title="Dọn dẹp việc đã xong">
+            <i class="fa-solid fa-broom"></i>
+            <span>Dọn việc xong</span>
+          </button>
+
+          <button id="add-task-btn" class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            <span>Thêm công việc</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Task List Grid -->
+      <main class="task-grid" id="task-grid">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">✨</div>
+          <h3 class="empty-title" id="empty-title">Chưa có công việc nào</h3>
+          <p class="empty-sub" id="empty-sub">Bấm nút "Thêm công việc" để khởi tạo nhiệm vụ mới!</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- VIEW 2: KPI ANALYTICS & DASHBOARD -->
+    <div id="view-kpi" class="app-view">
+      <!-- KPI Executive Header Card -->
+      <div class="kpi-header-banner">
+        <div class="kpi-banner-info">
+          <h2>📊 Báo Cáo Hiệu Suất & Thống Kê KPI</h2>
+          <p>Phân tích chỉ số hoàn thành công việc, tỷ lệ đúng hạn và đánh giá hiệu suất năng suất làm việc cá nhân.</p>
+        </div>
+        <div class="kpi-score-ring">
+          <div class="score-number" id="kpi-score-val">0%</div>
+          <div class="score-label">Điểm Năng Suất KPI</div>
+          <div class="score-badge" id="kpi-score-badge">Đang tính toán</div>
         </div>
       </div>
-      
-      <div class="stat-card clickable" data-stat-filter="pending" title="Lọc công việc đang làm">
-        <div class="stat-icon pending"><i class="fa-solid fa-spinner"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="stat-pending">0</div>
-          <div class="stat-label">Đang thực hiện</div>
+
+      <!-- KPI Metrics Grid -->
+      <div class="kpi-metrics-grid">
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Tỷ lệ hoàn thành công việc</span>
+            <i class="fa-solid fa-circle-check kpi-icon text-success"></i>
+          </div>
+          <div class="kpi-value" id="kpi-completion-rate">0%</div>
+          <div class="kpi-progress-bar"><div class="kpi-progress-fill" id="kpi-completion-bar" style="width: 0%;"></div></div>
+          <div class="kpi-footer-sub" id="kpi-completion-sub">0/0 công việc đã xong</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Tỷ lệ hoàn thành ĐÚNG HẠN</span>
+            <i class="fa-solid fa-clock-check kpi-icon text-primary"></i>
+          </div>
+          <div class="kpi-value" id="kpi-ontime-rate">0%</div>
+          <div class="kpi-progress-bar"><div class="kpi-progress-fill bg-primary" id="kpi-ontime-bar" style="width: 0%;"></div></div>
+          <div class="kpi-footer-sub" id="kpi-ontime-sub">Không có công việc trễ hạn</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Công việc Khẩn cấp (Ưu tiên Cao)</span>
+            <i class="fa-solid fa-fire kpi-icon text-danger"></i>
+          </div>
+          <div class="kpi-value" id="kpi-high-count">0</div>
+          <div class="kpi-progress-bar"><div class="kpi-progress-fill bg-danger" id="kpi-high-bar" style="width: 0%;"></div></div>
+          <div class="kpi-footer-sub" id="kpi-high-sub">Cần tập trung giải quyết</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Cảnh báo Quá Hạn KPI</span>
+            <i class="fa-solid fa-triangle-exclamation kpi-icon text-warning"></i>
+          </div>
+          <div class="kpi-value" id="kpi-overdue-count">0</div>
+          <div class="kpi-progress-bar"><div class="kpi-progress-fill bg-warning" id="kpi-overdue-bar" style="width: 0%;"></div></div>
+          <div class="kpi-footer-sub" id="kpi-overdue-sub">Nhiệm vụ cần khắc phục ngay</div>
         </div>
       </div>
 
-      <div class="stat-card clickable" data-stat-filter="completed" title="Lọc công việc đã xong">
-        <div class="stat-icon completed"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="stat-completed">0</div>
-          <div class="stat-label">Đã hoàn thành</div>
+      <!-- KPI Charts Section -->
+      <div class="kpi-charts-grid">
+        <div class="chart-card">
+          <h3>🔥 Biểu Đồ Phân Phối Độ Ưu Tiên (Priority Distribution)</h3>
+          <div class="chart-container">
+            <canvas id="priorityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>📈 Biểu Đồ Trạng Thái Công Việc (Status Breakdown)</h3>
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
         </div>
       </div>
-
-      <div class="stat-card clickable" data-stat-filter="overdue" title="Lọc công việc đã quá hạn">
-        <div class="stat-icon overdue"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="stat-overdue">0</div>
-          <div class="stat-label">Quá hạn</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Control Toolbar (Search, Filters, Sort & Actions) -->
-    <section class="toolbar">
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="search-input" placeholder="Tìm kiếm công việc... (Ctrl+K)" aria-label="Search Tasks">
-      </div>
-
-      <!-- Status Filter Tabs -->
-      <div class="filter-group" id="filter-tabs">
-        <button class="filter-btn active" data-filter="all">Tất cả</button>
-        <button class="filter-btn" data-filter="pending">Đang làm</button>
-        <button class="filter-btn" data-filter="completed">Đã xong</button>
-        <button class="filter-btn" data-filter="overdue">Quá hạn</button>
-      </div>
-
-      <!-- Priority & Sort Dropdowns -->
-      <div class="select-group">
-        <select id="priority-filter-select" class="toolbar-select" title="Lọc theo độ ưu tiên">
-          <option value="all">⚡ Tất cả độ ưu tiên</option>
-          <option value="high">🔴 Ưu tiên Cao</option>
-          <option value="medium">🟡 Ưu tiên Trung bình</option>
-          <option value="low">🟢 Ưu tiên Thấp</option>
-        </select>
-
-        <select id="sort-by-select" class="toolbar-select" title="Sắp xếp danh sách">
-          <option value="createdAt">🕒 Mới nhất trước</option>
-          <option value="priority">🔥 Ưu tiên cao trước</option>
-          <option value="dueDate">📅 Hạn chót trước</option>
-        </select>
-      </div>
-
-      <!-- Actions: Clear Completed & Add Task -->
-      <div class="toolbar-actions">
-        <button id="clear-completed-btn" class="btn-secondary danger" title="Xóa tất cả việc đã hoàn thành">
-          <i class="fa-solid fa-broom"></i>
-          <span>Dọn việc xong</span>
-        </button>
-
-        <button id="add-task-btn" class="btn-primary">
-          <i class="fa-solid fa-plus"></i>
-          <span>Thêm công việc</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Main Task List Grid -->
-    <main class="task-grid" id="task-grid">
-      <!-- Task Cards will be dynamically injected here -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-icon">📌</div>
-        <h3 class="empty-title" id="empty-title">Chưa có công việc nào</h3>
-        <p class="empty-sub" id="empty-sub">Hãy bấm nút "Thêm công việc" để tạo nhiệm vụ mới ngay!</p>
-      </div>
-    </main>
+    </div>
   </div>
 
   <!-- Modal Form: Add / Edit Task -->
@@ -168,11 +262,11 @@
 
         <div class="form-group">
           <label class="form-label" for="task-desc-input">Ghi chú / Mô tả chi tiết</label>
-          <textarea id="task-desc-input" class="form-textarea" rows="3" placeholder="Nhập ghi chú thêm cho công việc..."></textarea>
+          <textarea id="task-desc-input" class="form-textarea" rows="3" placeholder="Nhập ghi chú thêm..."></textarea>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="task-priority-input">Mức độ ưu tiên</label>
+          <label class="form-label" for="task-priority-input">Mức độ ưu tiên KPI</label>
           <select id="task-priority-input" class="form-select">
             <option value="low">🟢 Thấp (Bình thường)</option>
             <option value="medium" selected>🟡 Trung bình (Quan trọng)</option>
