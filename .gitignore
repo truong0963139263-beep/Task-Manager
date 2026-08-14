@@ -1,3 +1,7 @@
+# Pycache & Bytecode
+__pycache__/
+*.pyc
+
 # Logs & Scratch files
 *.log
 scratch/
@@ -6,5 +10,5 @@ scratch/
 .DS_Store
 Thumbs.db
 
-# Node dependencies (if any added later)
-node_modules/
+# Data files
+tasks_data.json
