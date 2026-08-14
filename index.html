@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow — Ứng dụng quản lý công việc cá nhân hiện đại, siêu nhẹ, tối ưu hiệu suất làm việc hàng ngày.">
+  <title>TaskFlow — Quản Lý Công Việc Cá Nhân</title>
+
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom Design System Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Ambient Background Glow -->
+  <div class="app-bg-glow">
+    <div class="glow-blob-1"></div>
+    <div class="glow-blob-2"></div>
+  </div>
+
+  <div class="container">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-check-double"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">TaskFlow</h1>
+          <div class="brand-subtitle">Quản lý công việc cá nhân thông minh</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="export-btn" class="btn-icon" title="Xuất dữ liệu dự án (JSON Backup)" aria-label="Export Data">
+          <i class="fa-solid fa-download"></i>
+        </button>
+        <button id="import-btn" class="btn-icon" title="Phục hồi dữ liệu từ file JSON" aria-label="Import Data">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+        <button id="theme-toggle-btn" class="btn-icon" title="Chuyển đổi Chế độ Sáng/Tối" aria-label="Toggle Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Keyboard Shortcuts Hint Bar -->
+    <div class="keyboard-hint-bar">
+      <span><kbd>Ctrl</kbd> + <kbd>K</kbd> Tìm kiếm</span>
+      <span><kbd>Ctrl</kbd> + <kbd>N</kbd> Thêm việc mới</span>
+      <span><kbd>Esc</kbd> Đóng cửa sổ</span>
+    </div>
+
+    <!-- Stats Dashboard Bar (Clickable Stat Cards) -->
+    <section class="stats-dashboard" id="stats-dashboard">
+      <div class="stat-card clickable" data-stat-filter="all" title="Xem tất cả công việc">
+        <div class="stat-icon total"><i class="fa-solid fa-list-check"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Tổng số việc</div>
+        </div>
+      </div>
+      
+      <div class="stat-card clickable" data-stat-filter="pending" title="Lọc công việc đang làm">
+        <div class="stat-icon pending"><i class="fa-solid fa-spinner"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-label">Đang thực hiện</div>
+        </div>
+      </div>
+
+      <div class="stat-card clickable" data-stat-filter="completed" title="Lọc công việc đã xong">
+        <div class="stat-icon completed"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-completed">0</div>
+          <div class="stat-label">Đã hoàn thành</div>
+        </div>
+      </div>
+
+      <div class="stat-card clickable" data-stat-filter="overdue" title="Lọc công việc đã quá hạn">
+        <div class="stat-icon overdue"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-overdue">0</div>
+          <div class="stat-label">Quá hạn</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Control Toolbar (Search, Filters, Sort & Actions) -->
+    <section class="toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="Tìm kiếm công việc... (Ctrl+K)" aria-label="Search Tasks">
+      </div>
+
+      <!-- Status Filter Tabs -->
+      <div class="filter-group" id="filter-tabs">
+        <button class="filter-btn active" data-filter="all">Tất cả</button>
+        <button class="filter-btn" data-filter="pending">Đang làm</button>
+        <button class="filter-btn" data-filter="completed">Đã xong</button>
+        <button class="filter-btn" data-filter="overdue">Quá hạn</button>
+      </div>
+
+      <!-- Priority & Sort Dropdowns -->
+      <div class="select-group">
+        <select id="priority-filter-select" class="toolbar-select" title="Lọc theo độ ưu tiên">
+          <option value="all">⚡ Tất cả độ ưu tiên</option>
+          <option value="high">🔴 Ưu tiên Cao</option>
+          <option value="medium">🟡 Ưu tiên Trung bình</option>
+          <option value="low">🟢 Ưu tiên Thấp</option>
+        </select>
+
+        <select id="sort-by-select" class="toolbar-select" title="Sắp xếp danh sách">
+          <option value="createdAt">🕒 Mới nhất trước</option>
+          <option value="priority">🔥 Ưu tiên cao trước</option>
+          <option value="dueDate">📅 Hạn chót trước</option>
+        </select>
+      </div>
+
+      <!-- Actions: Clear Completed & Add Task -->
+      <div class="toolbar-actions">
+        <button id="clear-completed-btn" class="btn-secondary danger" title="Xóa tất cả việc đã hoàn thành">
+          <i class="fa-solid fa-broom"></i>
+          <span>Dọn việc xong</span>
+        </button>
+
+        <button id="add-task-btn" class="btn-primary">
+          <i class="fa-solid fa-plus"></i>
+          <span>Thêm công việc</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Task List Grid -->
+    <main class="task-grid" id="task-grid">
+      <!-- Task Cards will be dynamically injected here -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📌</div>
+        <h3 class="empty-title" id="empty-title">Chưa có công việc nào</h3>
+        <p class="empty-sub" id="empty-sub">Hãy bấm nút "Thêm công việc" để tạo nhiệm vụ mới ngay!</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Form: Add / Edit Task -->
+  <div class="modal-backdrop" id="task-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-heading">Thêm công việc mới</h2>
+        <button class="btn-icon" id="close-modal-btn" aria-label="Close Modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="task-form">
+        <input type="hidden" id="task-id">
+
+        <div class="form-group">
+          <label class="form-label" for="task-title-input">Tên công việc <span style="color: var(--priority-high);">*</span></label>
+          <input type="text" id="task-title-input" class="form-input" placeholder="Ví dụ: Thiết kế giao diện trang chủ" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-desc-input">Ghi chú / Mô tả chi tiết</label>
+          <textarea id="task-desc-input" class="form-textarea" rows="3" placeholder="Nhập ghi chú thêm cho công việc..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-priority-input">Mức độ ưu tiên</label>
+          <select id="task-priority-input" class="form-select">
+            <option value="low">🟢 Thấp (Bình thường)</option>
+            <option value="medium" selected>🟡 Trung bình (Quan trọng)</option>
+            <option value="high">🔴 Cao (Khẩn cấp)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-date-input">Hạn chót (Deadline)</label>
+          <input type="date" id="task-date-input" class="form-input">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancel-modal-btn">Hủy</button>
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Lưu công việc</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

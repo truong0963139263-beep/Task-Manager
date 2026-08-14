@@ -1,0 +1,17 @@
+{
+  "updated_at": "2026-08-14T20:17:50+07:00",
+  "communication": {
+    "tone": "friendly",
+    "persona": "assistant"
+  },
+  "technical": {
+    "detail_level": "simple",
+    "autonomy": "ask_often",
+    "quality": "production"
+  },
+  "working_style": {
+    "pace": "careful",
+    "feedback": "gentle"
+  },
+  "custom_rules": []
+}

@@ -1,0 +1,45 @@
+{
+  "project": {
+    "name": "task-manager",
+    "description": "Ứng dụng Web App quản lý công việc cá nhân",
+    "created_at": "2026-08-14T20:17:00+07:00"
+  },
+  "tech_stack": [
+    "HTML5",
+    "Vanilla CSS",
+    "JavaScript ES6",
+    "LocalStorage API"
+  ],
+  "features": [
+    "CRUD Task",
+    "Priority Badges",
+    "Deadline Alerts",
+    "Real-time Filter & Search",
+    "Priority & Sort Selectors",
+    "Batch Clear Completed",
+    "Keyboard Shortcuts (Ctrl+K, Ctrl+N, Esc)",
+    "JSON Data Backup & Restore",
+    "Dark Mode / Light Mode Theme"
+  ],
+  "progress": {
+    "current_phase": "Phase 05 Complete - Project Finished",
+    "completion": "100%"
+  },
+  "decisions": [
+    {
+      "topic": "Product Type",
+      "choice": "Web App",
+      "date": "2026-08-14"
+    },
+    {
+      "topic": "Tech Stack",
+      "choice": "HTML5 + Vanilla CSS + JS ES6",
+      "date": "2026-08-14"
+    },
+    {
+      "topic": "Storage",
+      "choice": "Browser LocalStorage API",
+      "date": "2026-08-14"
+    }
+  ]
+}

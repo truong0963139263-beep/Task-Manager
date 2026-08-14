@@ -1,0 +1,10 @@
+# Logs & Scratch files
+*.log
+scratch/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Node dependencies (if any added later)
+node_modules/
